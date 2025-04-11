@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ABC Bank</title>
+    <style>
+        body { font-family: Arial; text-align: center; background-color: #f4f4f4; padding: 30px; }
+        h1 { color: darkblue; }
+        input, button { padding: 10px; margin: 5px; }
+        #menu, #transactions, #details { display: none; margin-top: 20px; }
+        .box { background: white; padding: 20px; border-radius: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Welcome to ABC Bank</h1>
+        <hr>
+        <div id="setup">
+            <p>Enter your Name:</p>
+            <input type="text" id="name"><br>
+            <p>Enter your Account Number:</p>
+            <input type="number" id="acc"><br>
+            <p>Set a Password:</p>
+            <input type="password" id="pass"><br>
+            <button onclick="setupAccount()">Continue</button>
+        </div>
+
+        <div id="login">
+            <p>Enter your password to login:</p>
+            <input type="password" id="loginPass"><br>
+            <button onclick="validateLogin()">Login</button>
+        </div>
+
+        <div id="menu">
+            <h3>Main Menu</h3>
+            <button onclick="deposit()">Deposit Money</button>
+            <button onclick="withdraw()">Withdraw Money</button>
+            <button onclick="transfer()">Transfer Money</button>
+            <button onclick="showDetails()">Account Details</button>
+            <button onclick="showTransactions()">Transaction History</button>
+        </div>
+
+        <div id="details"></div>
+        <div id="transactions"></div>
+    </div>
+
+    <script>
+        let user = {}, balance = 10000, history = [];
+
+        function setupAccount() {
+            user.name = document.getElementById("name").value;
+            user.acc = document.getElementById("acc").value;
+            user.pass = document.getElementById("pass").value;
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("balance", balance);
+            localStorage.setItem("history", JSON.stringify(history));
+            document.getElementById("setup").style.display = "none";
+            document.getElementById("login").style.display = "block";
+        }
+
+        function validateLogin() {
+            const entered = document.getElementById("loginPass").value;
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+            if (entered === storedUser.pass) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("menu").style.display = "block";
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        function deposit() {
+            let amt = prompt("Enter deposit amount:");
+            if (amt) {
+                balance = parseInt(localStorage.getItem("balance")) + parseInt(amt);
+                history = JSON.parse(localStorage.getItem("history"));
+                history.push(`Deposited Rs ${amt}`);
+                localStorage.setItem("balance", balance);
+                localStorage.setItem("history", JSON.stringify(history));
+                alert("Deposited Successfully!");
+            }
+        }
+
+        function withdraw() {
+            let amt = prompt("Enter withdrawal amount:");
+            let current = parseInt(localStorage.getItem("balance"));
+            if (amt > current) {
+                alert("Insufficient funds!");
+            } else {
+                balance = current - amt;
+                history = JSON.parse(localStorage.getItem("history"));
+                history.push(`Withdrew Rs ${amt}`);
+                localStorage.setItem("balance", balance);
+                localStorage.setItem("history", JSON.stringify(history));
+                alert("Withdrawn Successfully!");
+            }
+        }
+
+        function transfer() {
+            let acc = prompt("Enter receiver account number:");
+            let amt = prompt("Enter transfer amount:");
+            if (amt > balance) {
+                alert("Insufficient balance!");
+                return;
+            }
+            balance -= amt;
+            history = JSON.parse(localStorage.getItem("history"));
+            history.push(`Transferred Rs ${amt} to account ${acc}`);
+            localStorage.setItem("balance", balance);
+            localStorage.setItem("history", JSON.stringify(history));
+            alert("Transferred Successfully!");
+        }
+
+        function showDetails() {
+            const u = JSON.parse(localStorage.getItem("user"));
+            let bal = localStorage.getItem("balance");
+            document.getElementById("details").innerHTML = `
+                <h3>Account Details</h3>
+                Name: ${u.name} <br>
+                Account Number: ${u.acc} <br>
+                Balance: Rs ${bal}
+            `;
+            document.getElementById("details").style.display = "block";
+        }
+
+        function showTransactions() {
+            let h = JSON.parse(localStorage.getItem("history"));
+            let output = "<h3>Transaction History</h3><ul>";
+            h.forEach(item => output += `<li>${item}</li>`);
+            output += "</ul>";
+            document.getElementById("transactions").innerHTML = output;
+            document.getElementById("transactions").style.display = "block";
+        }
+    </script>
+</body>
+</html>
